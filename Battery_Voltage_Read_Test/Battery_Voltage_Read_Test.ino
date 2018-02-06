@@ -43,9 +43,9 @@ in front of the #define SupplyAD and #define LED1 lines.
 */
 
 
-//#define SupplyAD A0                //Ressitor divider for battery connected here  
-//#define LED1 13                    //pin for LED 
-//#define ADMultiplier 10            //adjustment to convert AD value read into mV of battery voltage
+#define SupplyAD A0                //Ressitor divider for battery connected here  
+#define LED1 10                    //pin for LED 
+#define ADMultiplier 10            //adjustment to convert AD value read into mV of battery voltage
 
 
 /*

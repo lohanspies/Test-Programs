@@ -41,8 +41,8 @@ You can explicitly define the required pin below by removing the two // characte
 ********************************************************************************************************************************
 */
 
-//#define SWITCH1 3                    //Arduino pin number for Switch, should be pulled low with switch pressed. 
-//#define LED1 8                       //Arduino pin number for LED, when high LED should be on.
+#define SWITCH1 3                    //Arduino pin number for Switch, should be pulled low with switch pressed. 
+#define LED1 10                      //Arduino pin number for LED, when high LED should be on.
 
 
 /*
@@ -58,7 +58,7 @@ Select (include) the board definition file you require by removing the // charac
 
 //#include "HAB2_Board_Definitions.h"
 //#include "Locator2_Board_Definitions.h"
-#include "LCD_Receiver_Board_Definitions.h"
+//#include "LCD_Receiver_Board_Definitions.h"
 //#include "Relay1_Board_Definitions.h"
 //#include "Receiver2_Board_Defintions.h"
 //#include "Sensor1_Board_Definitions.h"
@@ -70,6 +70,8 @@ Select (include) the board definition file you require by removing the // charac
 
 
 #include "PinChangeInterrupt.h"                    //https://github.com/NicoHood/PinChangeInterrupt
+
+#define Serial_Monitor_Baud 38400          //this is baud rate used for the Arduino IDE Serial Monitor
 
 unsigned long SWITCH1_Interrupt_Count = 0;
 
@@ -118,7 +120,7 @@ void led_Flash(unsigned int flashes, unsigned int delaymS)
 
 void setup()
 {
-  Serial.begin(38400);                       //setup Serial console ouput
+  Serial.begin(Serial_Monitor_Baud);                       //setup Serial console ouput
   Serial.println();
   Serial.println(F(programname));
   Serial.println(F(programversion));

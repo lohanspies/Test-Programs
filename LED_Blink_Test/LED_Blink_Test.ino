@@ -4,7 +4,6 @@
 #define aurthorname "Stuart Robinson"
 #include <Arduino.h>
 #include "Program_Definitions.h"                     //part of LoRaTracker library
-#define LoRa_Device_in_MB1                           //required if board is using Mikrobus sockets
 
 /*
 *****************************************************************************************************************************
@@ -40,7 +39,7 @@ You can explicitly define the required pin below by removing the two // characte
 ********************************************************************************************************************************
 */
 
-//#define LED1 8                       //Arduino pin number for LED, when high LED should be on.
+#define LED1 8                       //Arduino pin number for LED, when high LED should be on.
 
 
 /*
@@ -67,11 +66,14 @@ Select (include) the board definition file you require by removing the // charac
 //#include "MarkTwo_Board_Definitions.h"
 
 
+#define Serial_Monitor_Baud 38400          //this is baud rate used for the Arduino IDE Serial Monitor
+
 
 void loop() 
 {
   Serial.println(F("LED Flash"));
   Serial.println();
+  led_Flash(5,250);
  
   delay(2000);
 }
@@ -96,8 +98,7 @@ void led_Flash(unsigned int flashes, unsigned int delaymS)
 
 void setup()
 {
-  Serial.println();
-  Serial.begin(38400);                       //setup Serial console ouput
+  Serial.begin(Serial_Monitor_Baud);          //setup Serial console ouput
   Serial.println(F(programname));
   Serial.println(F(programversion));
   Serial.println(F(dateproduced));

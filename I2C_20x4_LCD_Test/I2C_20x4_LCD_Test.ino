@@ -3,7 +3,6 @@
 #define dateproduced "29/11/2017"
 #define aurthorname "Stuart Robinson"
 #include <Arduino.h>
-#include "Program_Definitions.h"                     //part of LoRaTracker library
 
 /*
 *****************************************************************************************************************************
@@ -32,7 +31,7 @@ on the LCD display are readily available at low cost.
 
 First the program scans the I2C bus for devices, it should report a device found at 0x3F, this is the PCF8563.
 
-Then you should see this on the LCD, assuming you have adjusted the contrast correctly. 
+Then you should see this as the first scree on the LCD, assuming you have adjusted the contrast correctly. 
 
 LoRaTracker.uk
 I2C LCD Backpack
@@ -58,10 +57,12 @@ The program uses the standard I2C connections on Arduino.
 
 LiquidCrystal_I2C disp(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  //Set the LCD I2C address and pins used
 
+#define Serial_Monitor_Baud 38400                                //this is baud rate used for the Arduino IDE Serial Monitor
+
 void loop()
 {
 screen1();
-delay(5000);
+delay(2000);
 disp.clear();
 screen2();
 delay(5000);
@@ -87,10 +88,10 @@ disp.print("Last Line of Text");
 
 void screen2()
 {
-disp.setCursor(0,0);                //Start at character 4 on line 0
+disp.setCursor(0,0);                
 disp.print("LAT 51.48230  48M");
 disp.setCursor(0,1);
-disp.print("LON -3.18136");         //Print text on 2nd Line
+disp.print("LON -3.18136");         
 disp.setCursor(0,2);
 disp.print("9.2K 6D");             
 disp.setCursor(0,3);
@@ -98,10 +99,9 @@ disp.print("SNR 8dB     1    SEG");
 }
 
 
-
 void setup()
 {
-  Serial.begin(38400);  
+  Serial.begin(Serial_Monitor_Baud);  
 
   setup_I2CScan();
   run_I2CScan();

@@ -1,16 +1,16 @@
-#define programname "EchoGPS_Softwareserial_Test"
-#define programversion "V1.1"
-#define dateproduced "28/11/2017"
+#define programname "AFSK_RTTY_Test_Program"
+#define programversion "V1.2"
+#define dateproduced "05/12/2017"
 #define aurthorname "Stuart Robinson"
 #include <Arduino.h>
-#include "Program_Definitions.h"                     //part of LoRaTracker library
-#define GPS_in_MB2                                   //required if board is using Mikrobus sockets
+#include "Program_Definitions.h"
 
 /*
 *****************************************************************************************************************************
+
 LoRaTracker Test Programs
 
-Copyright of the author Stuart Robinson - 28/11/2017
+Copyright of the author Stuart Robinson - 05/12/2017
 
 http://www.LoRaTracker.uk
 
@@ -21,6 +21,7 @@ of the author Stuart Robinson.
 
 The programs are supplied as is, it is up to individual to decide if the programs are suitable for the intended purpose and
 free from errors.
+
 *****************************************************************************************************************************
 */
 
@@ -28,8 +29,11 @@ free from errors.
 ********************************************************************************************************************************
 Program operation
 
-The purpose of this program is to check that a Serial GPS is working. Characters are read from the GPS at 9600 baud (default) 
-using software serial and sent to the Arduino IDE Serial Monitor at 115200 baud (default).
+This test program has been written to check that hardware for sending AFSK RTTY on the receiver board has been connected
+correctly. The audio output is connected to a PC sound cards microphone input. The AFSK RTTY is snet as ASCII 7 bit, 2 Stop bit,
+no parity, 300 baud. Tones are 634Hz for a 0 bit and 1000hz for 1 bit. A screenshot of the FLDIGI settings used in in the folder
+containing the program; 'FLDIGI Settings.jpg'
+
 ********************************************************************************************************************************
 */
 
@@ -37,14 +41,13 @@ using software serial and sent to the Arduino IDE Serial Monitor at 115200 baud 
 ********************************************************************************************************************************
 Connections
 
-The program uses two pins for the software serial interface on the Arduino. You can explicitly define the required pins below
-by removing the two // characters in front of the #defines 
+The program uses 2 pins on the Arduino, Audio_Out and LED1. You can explicitly define them below by removing the two // characters
+in front of the #define Audio_Out and #define LED1 lines.
 ********************************************************************************************************************************
 */
 
-#define GPSTX A2                           //pin number for TX output - Arduino into GPS
-#define GPSRX A3                           //pin number for RX input - To Arduino from GPS
-#define GPSPOWER -1                        //not used pin for non LoRaTracker boards, leave as -1
+#define Audio_Out 6              //Pin used to output Audio tones  
+#define LED1 10                  //LED1 is toggled inside the AFSK_RTTY library, high for logic 1, low for logic 0, so it can be used to check the timing.
 
 /*
 ***********************************************************************************************************************************************
@@ -53,7 +56,7 @@ Board Definitions
 As an alternative to explicitly defining the Arduino pins required, there are pre-defined board definition files for the LoRaTracker boards
 included in the LoRaTracker Library;
 
-HTTPS://github.com/LoRaTracker/LoRaTracker-Library
+https://github.com/LoRaTracker/LoRaTracker-Library
 
 Select (include) the board definition file you require by removing the // characters before the appropriate include line in the list below
 ***********************************************************************************************************************************************
@@ -71,35 +74,71 @@ Select (include) the board definition file you require by removing the // charac
 //#include "RFM98_Shield_January2016_Board_Definitions.h"
 //#include "MarkTwo_Board_Definitions.h"
 
+#define Serial_Monitor_Baud 38400        //this is baud rate used for the Arduino IDE Serial Monitor
 
-#define GPSBaud 9600                         //baud rate for GPS 
-#define Serial_Monitor_Baud 115200           //this is baud rate used for the Arduino IDE Serial Monitor
+const int AFSKrttybaud = 1470;           //delay in uS x 2 for 1 bit. 4700 = 100baud, 2295 = 200baud, 1470 = 300baud 
+const int afskleadinmS = 500;            //number of ms for AFSK constant lead in tone
+const int tonehighHz = 1000;             //high tone in Hertz 
+const int tonelowHz = 634;               //low tone in Hertz   
+
+#include "AFSK_RTTY.h"
+
+String TestString = "www.LoRaTracker.uk - Hello World";               //This string is sent as AFSK RTTY, 7 bit, 2 Stop bit, no parity, 300 baud.
+
+byte TXBUFF[64];
+byte Output_len_max = 64;
+byte Count;
+unsigned int Loopcount = 0;
 
 
-#include <SoftwareSerial.h>                     
-SoftwareSerial GPSserial(GPSRX, GPSTX);        
-
-
-void loop()                    
+void loop()
 {
-  while (GPSserial.available() > 0)
-  Serial.write(GPSserial.read());
+  byte index, j;
+  Serial.print(F("Send AFSK RTTY "));
+  Loopcount++;
+  Count = build_message();
+
+  start_AFSK_RTTY();
+  
+  for (index = 0; index <= Count; index++)
+  {
+    j = TXBUFF[index];
+    SendAFSKRTTY(j);
+  }
+
+  SendAFSKRTTY(13);
+
+  Serial.println();
+
+  delay(1500);
+
+}
+
+
+byte build_message()
+{
+  memset(TXBUFF, 0, sizeof(TXBUFF));                     //clear array
+
+  Count = snprintf((char*) TXBUFF,
+           Output_len_max,
+           "www.LoRaTracker.uk - Hello World %d",
+           Loopcount
+           );
+
+  return Count;
 }
 
 
 void setup()
 {
-  Serial.begin(Serial_Monitor_Baud);         //setup Serial console ouput
+  pinMode(LED1, OUTPUT);                                 //for PCB LED
+  Serial.begin(Serial_Monitor_Baud);                                   //setup Serial console ouput
   Serial.println(F(programname));
   Serial.println(F(programversion));
   Serial.println(F(dateproduced));
   Serial.println(F(aurthorname));
   Serial.println();
-  
-  pinMode(GPSPOWER, OUTPUT);                 //setup pin for GPS Power Control, in case its in use
-  digitalWrite(GPSPOWER,LOW);
-  
-  GPSserial.begin(GPSBaud);                  //start softserial for GPS at defined baud rate   
+
 }
 
 

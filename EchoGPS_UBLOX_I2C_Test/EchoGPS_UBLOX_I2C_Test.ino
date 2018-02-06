@@ -8,54 +8,57 @@
 
 /*
 *****************************************************************************************************************************
-LoRaTracker Test Programs
+  LoRaTracker Test Programs
 
-Copyright of the author Stuart Robinson - 28/11/2017
+  Copyright of the author Stuart Robinson - 28/11/2017
 
-http://www.LoRaTracker.uk
+  http://www.LoRaTracker.uk
 
-These programs may be used free of charge for personal, recreational and educational purposes only.
+  These programs may be used free of charge for personal, recreational and educational purposes only.
 
-This program, or parts of it, may not be used for or in connection with any commercial purpose without the explicit permission
-of the author Stuart Robinson.
+  This program, or parts of it, may not be used for or in connection with any commercial purpose without the explicit permission
+  of the author Stuart Robinson.
 
-The programs are supplied as is, it is up to individual to decide if the programs are suitable for the intended purpose and
-free from errors.
+  The programs are supplied as is, it is up to individual to decide if the programs are suitable for the intended purpose and
+  free from errors.
 *****************************************************************************************************************************
 */
 
 /*
 ********************************************************************************************************************************
-Program operation
+  Program operation
 
-The purpose of this program is to check that a I2C connected UBLOX GPS is working. First a series of configuration commands are
-sent to the GPS and the acknowlegements checked. The GPS is put into navigation model 6 (for 18,000m + operation) and the 
-navigation model is then polled and checked. Characters are then read from the GPS and sent to the Arduino IDE Serial Monitor
-at 115200 baud (default).
+  The purpose of this program is to check that a I2C connected UBLOX GPS is working. First a series of configuration commands are
+  sent to the GPS and the acknowlegements checked. The GPS is put into navigation model 6 (for 18,000m + operation) and the
+  navigation model is then polled and checked. Characters are then read from the GPS and sent to the Arduino IDE Serial Monitor
+  at 115200 baud (default).
 ********************************************************************************************************************************
 */
 
 /*
 ********************************************************************************************************************************
-Connections
+  Connections
 
-The program uses the standard I2C connections. If your not using a LoRaTracker board definition file, uncommnet the #define 
-below by removeing the two // characters 
+  The program uses the standard I2C connections. If your not using a LoRaTracker board definition file, uncommnet the #define
+  below by removeing the two // characters
 ********************************************************************************************************************************
 */
 
-//#define GPSPOWER -1                             //not used for non LoRaTracker boards, leave at -1
+#define LED1 10                                 //pin for LED    
+#define GPSPOWER -1                             //not used for non LoRaTracker boards, leave at -1
+#define GPSTX -1                                //not used for non LoRaTracker boards, leave at -1    
+#define GPSRX -1                                //not used for non LoRaTracker boards, leave at -1 
 
 /*
 ***********************************************************************************************************************************************
-Board Definitions
+  Board Definitions
 
-As an alternative to explicitly defining the Arduino pins required, there are pre-defined board definition files for the LoRaTracker boards
-included in the LoRaTracker Library;
+  As an alternative to explicitly defining the Arduino pins required, there are pre-defined board definition files for the LoRaTracker boards
+  included in the LoRaTracker Library;
 
-HTTPS://github.com/LoRaTracker/LoRaTracker-Library
+  HTTPS://github.com/LoRaTracker/LoRaTracker-Library
 
-Select (include) the board definition file you require by removing the // characters before the appropriate include line in the list below
+  Select (include) the board definition file you require by removing the // characters before the appropriate include line in the list below
 ***********************************************************************************************************************************************
 */
 
@@ -77,7 +80,7 @@ const unsigned long GPS_WaitAck_mS = 2000;       //number of mS to wait for an A
 const byte GPS_attempts = 3;                     //number of times the sending of GPS config will be attempted.
 const byte GPS_Reply_Size = 12;                  //size of GPS reply buffer
 const unsigned int GPS_Clear_DelaymS = 2000;     //mS to wait after a GPS Clear command is sent
-boolean GPS_Config_Error;  
+boolean GPS_Config_Error;
 
 #define GPS_ALLOW_GPGSV                          //we want to see the GPGSV messages 
 #include "UBLOX_I2CGPS2.h"                       //from LoRaTracker library 
@@ -120,7 +123,7 @@ void setup()
 {
   pinMode(GPSPOWER, OUTPUT);	               //setup pin for GPS Power Control
   digitalWrite(GPSPOWER, LOW);
- 
+
   Serial.begin(115200);                      //connect at 115200 so we can read the GPS fast enough and also spit it out
   Serial.println();
   Serial.println(F(programname));
@@ -142,7 +145,11 @@ void setup()
     Serial.println();
     led_Flash(100, 25);
   }
-    
+
+  Serial.println(F("Starting GPS Read"));
+
+  Wire.begin();
+
 }
 
 

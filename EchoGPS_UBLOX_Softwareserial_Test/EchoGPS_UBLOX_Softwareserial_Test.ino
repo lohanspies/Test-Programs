@@ -44,6 +44,7 @@ by removing the // characters in front of the 3 #defines
 ********************************************************************************************************************************
 */
 
+//#define LED1 10                            //pin for LED  
 //#define GPSTX A2                           //pin number for TX output - Arduino into GPS
 //#define GPSRX A3                           //pin number for RX input - To Arduino from GPS
 //#define GPSPOWER -1                        //not used for non LoRaTracker boards, leave at -1
@@ -61,7 +62,7 @@ Select (include) the board definition file you require by removing the // charac
 ***********************************************************************************************************************************************
 */
 
-//#include "HAB2_Board_Definitions.h"
+#include "HAB2_Board_Definitions.h"
 //#include "Locator2_Board_Definitions.h"
 //#include "LCD_Receiver_Board_Definitions.h"
 //#include "Relay1_Board_Definitions.h"
@@ -137,7 +138,8 @@ void setup()
     Serial.println();
     led_Flash(100, 25);
   }
-    
+
+  Serial.println(F("Starting GPS Read"));
 }
 
 

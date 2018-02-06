@@ -12,7 +12,7 @@ Define the pins to be used for Software Serial and the baud rate the GPS is usin
 #define GPSTX 2                          //pin number for TX output - data from Arduino into GPS
 #define GPSRX 3                          //pin number for RX input - To Arduino from GPS
 #define GPSBaud 9600                     //GPS Baud rate
-
+#define Serial_Monitor_Baud 115200       //this is baud rate used for the Arduino IDE Serial Monitor
 
 #include <Arduino.h>
 #include <SoftwareSerial.h>                     
@@ -28,7 +28,7 @@ void loop()
 
 void setup()
 {
- Serial.begin(115200);                    //setup Serial console ouput
+ Serial.begin(Serial_Monitor_Baud);       //setup Serial console ouput
  GPSserial.begin(GPSBaud);                //start softserial for GPS at defined baud rate
 }
 

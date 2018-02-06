@@ -70,7 +70,7 @@ Select (include) the board definition file you require by removing the // charac
 ***********************************************************************************************************************************************
 */
 
-//#include "HAB2_Board_Definitions.h"
+#include "HAB2_Board_Definitions.h"
 //#include "Locator2_Board_Definitions.h"
 //#include "LCD_Receiver_Board_Definitions.h"
 //#include "Relay1_Board_Definitions.h"
@@ -81,8 +81,7 @@ Select (include) the board definition file you require by removing the // charac
 //#include "PIHTracker3_Board_Definitions.h"
 //#include "RFM98_Shield_January2016_Board_Definitions.h"
 //#include "MarkTwo_Board_Definitions.h"
-
-
+//#include "MicroBit_Board_Definitions.h"
 
 #include <SPI.h>
 
@@ -94,7 +93,9 @@ const byte lora_RXBUFF_Size = 32;                   //needed for LoRa3 library
 const byte lora_TXBUFF_Size = 64;                   //needed for LoRa3 library        
 byte keypress;                                      //needed for LoRa3 library  
 
-#include "LoRa3.h"                                  //part of LoRaTracker library
+#include "LoRa4.h"                                  //part of LoRaTracker library
+
+#define Serial_Monitor_Baud 38400                   //this is baud rate used for the Arduino IDE Serial Monitor
 
 void loop()
 {
@@ -116,7 +117,7 @@ void loop()
     lora_SetFreq(Frequency, CalibrationOffset);
     Serial.print(F("Transmit FM Tone"));
     digitalWrite(LED1, HIGH);
-    lora_Tone(1000, 2500, 2);                          //Transmit an FM tone, 1000hz, 2500ms, 2dBm
+    lora_Tone(1000, 3500, 2);                          //Transmit an FM tone, 1000hz, 2500ms, 2dBm
     digitalWrite(LED1, LOW);
     Serial.println(F(" - Done"));
     Serial.println();
@@ -157,13 +158,12 @@ void setup()
 {
   pinMode(LED1, OUTPUT); 			               //for PCB LED
   pinMode(13, OUTPUT); 			                 //for Pro Mini LED, Pin13
-  pinMode(lora_TonePin, INPUT_PULLUP);		   //ensure tone out pin is input
   pinMode(lora_NReset, OUTPUT);			         //LoRa Device reset line
   pinMode (lora_NSS, OUTPUT);			           //LoRa Device select line
   digitalWrite(lora_NSS, HIGH);
   digitalWrite(lora_NReset, HIGH);
 
-  Serial.begin(38400);                       //setup Serial console ouput
+  Serial.begin(Serial_Monitor_Baud);         //setup Serial console ouput
   Serial.println(F(programname));
   Serial.println(F(programversion));
   Serial.println(F(dateproduced));
