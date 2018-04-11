@@ -54,8 +54,9 @@ The program uses the standard I2C connections on Arduino.
 #include <Wire.h>                                                //Comes with Arduino IDE
 #include <LiquidCrystal_I2C.h>                                   //www.4tronix.co.uk/arduino/sketches/LiquidCrystal_V1.2.1.zip
 #include "I2C_Scanner.h"
+#define PCF8574Address 0x3F                                      //address of PCF8574 can change, I have noted addresses of 0x27 and 0x3F
 
-LiquidCrystal_I2C disp(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  //Set the LCD I2C address and pins used
+LiquidCrystal_I2C disp(PCF8574Address, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  //Set the LCD I2C address and pins used
 
 #define Serial_Monitor_Baud 38400                                //this is baud rate used for the Arduino IDE Serial Monitor
 
@@ -65,6 +66,9 @@ screen1();
 delay(2000);
 disp.clear();
 screen2();
+delay(5000);
+disp.clear();
+screen3();
 delay(5000);
 disp.clear();
 }
@@ -97,6 +101,30 @@ disp.print("9.2K 6D");
 disp.setCursor(0,3);
 disp.print("SNR 8dB     1    SEG");
 }
+
+
+void screen3()
+{
+/*
+copy of LoRa messages received from NORSAT2 in orbit during The Things Network conferance, Amsterdam, 2018.
+Transmited at 162Mhz but received on a 434Mhz module !!!
+SNR,-18dB  RSSI,-107dB let's build this thing together
+SNR,-19dB  RSSI,-109dB TTNSAT calling here
+SNR,-18dB  RSSI,-109dB TTNSAT calling here
+SNR,-17dB  RSSI,-108dB let's bu
+SNR,-18dB  RSSI,-108dB hello from space, TTN! * 
+*/
+
+disp.setCursor(0,0);                
+disp.print("hello from space,TTN");
+disp.setCursor(0,1);
+disp.print("TTNSAT calling here");         
+disp.setCursor(0,2);
+disp.print("let's build this thi");             
+disp.setCursor(0,3);
+disp.print("SNR -18dB");
+}
+
 
 
 void setup()

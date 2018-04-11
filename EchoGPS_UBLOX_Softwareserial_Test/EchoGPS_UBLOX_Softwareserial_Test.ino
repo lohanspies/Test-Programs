@@ -62,8 +62,8 @@ Select (include) the board definition file you require by removing the // charac
 ***********************************************************************************************************************************************
 */
 
-#include "HAB2_Board_Definitions.h"
-//#include "Locator2_Board_Definitions.h"
+//#include "HAB2_Board_Definitions.h"
+#include "Locator2_Board_Definitions.h"
 //#include "LCD_Receiver_Board_Definitions.h"
 //#include "Relay1_Board_Definitions.h"
 //#include "Receiver2_Board_Definitions.h"

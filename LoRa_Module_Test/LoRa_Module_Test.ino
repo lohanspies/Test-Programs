@@ -70,8 +70,8 @@ Select (include) the board definition file you require by removing the // charac
 ***********************************************************************************************************************************************
 */
 
-#include "HAB2_Board_Definitions.h"
-//#include "Locator2_Board_Definitions.h"
+//#include "HAB2_Board_Definitions.h"
+#include "Locator2_Board_Definitions.h"
 //#include "LCD_Receiver_Board_Definitions.h"
 //#include "Relay1_Board_Definitions.h"
 //#include "Receiver2_Board_Definitions.h"
@@ -107,11 +107,19 @@ void loop()
   SPI.begin();
   SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
    
-  Serial.print(F("Checking LoRa Device"));
-
+  Serial.println(F("Checking LoRa Device"));
+  Serial.println();
+  Serial.print(F("Registers after reset - "));
+  lora_ResetDev();                                     //ensure registers are in initial state
+  lora_Print();                                        //initial print of registers
+  
+  Serial.println();
+  
   if (lora_CheckDevice() == true)
   {
-    Serial.println(F(" - Present"));
+    Serial.println(F("Device Present"));
+    Serial.println();
+    Serial.print(F("Registers after setup - "));
     lora_Setup();                                      //Do the initial LoRa Setup
     lora_Print();
     lora_SetFreq(Frequency, CalibrationOffset);
@@ -125,7 +133,8 @@ void loop()
   }
   else
   {
-    Serial.println(F(" - LoRa Device Not Found"));
+    Serial.println(F("Device Not Found"));
+    Serial.println();
     lora_Print();
     Serial.println();
     led_Flash(100,25);

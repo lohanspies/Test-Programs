@@ -3,7 +3,7 @@
 #define dateproduced "26/11/2017"
 #define aurthorname "Stuart Robinson"
 #include <Arduino.h>
-#include "Program_Definitions.h"                     //part of LoRaTracker library
+//#include "Program_Definitions.h"                     //part of LoRaTracker library
 
 /*
 *****************************************************************************************************************************

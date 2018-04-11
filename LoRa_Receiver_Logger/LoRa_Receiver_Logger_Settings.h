@@ -28,7 +28,7 @@ To Do:
 
 #define UseSD                                     //to use SD card logging include this define
 
-//#define UseDisplay                              //to use display include this define
+#define UseDisplay                                //to use display include this define
 const int Display_Address = 0x08;                 //for LoRaTracker display backpack when used
 
 #define LoRa_Device_in_MB1                        //if using a LoRaTracker MikroBus based board specify the socket for the LoRa Device
