@@ -1,5 +1,5 @@
 //SD1306_Display_Test.ino
-#define programname "SD1306 Display Test"
+#define programname "SSD1306 Display Test"
 #define programversion "V1.1"
 #define dateproduced "21/12/2017"
 #define aurthorname "Stuart Robinson"
@@ -27,10 +27,10 @@
 ********************************************************************************************************************************
   Program operation
 
-  This test program has written to test a 128x64 SD1306 OLED display at small and large text sizes
+  This test program has written to test a 128x64 SSD1306 OLED display at small and large text sizes
   monitor.
 
-  This test program uses the ASCII only SD1306 driver library; //https://github.com/greiman/SSD1306Ascii
+  This test program uses the ASCII only SSD1306 driver library; //https://github.com/greiman/SSD1306Ascii
 
 ********************************************************************************************************************************
 */
@@ -56,7 +56,7 @@ SSD1306AsciiAvrI2c disp;
 void loop(void)
 {
   Serial.println();
-  Serial.println(F("Running SD1306 Display Test"));
+  Serial.println(F("Running SSD1306 Display Test"));
 
   disp.clear();
   screen1();
