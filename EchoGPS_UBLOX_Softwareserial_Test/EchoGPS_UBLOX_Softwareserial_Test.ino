@@ -47,7 +47,7 @@ by removing the // characters in front of the 3 #defines
 //#define LED1 10                            //pin for LED  
 //#define GPSTX A2                           //pin number for TX output - Arduino into GPS
 //#define GPSRX A3                           //pin number for RX input - To Arduino from GPS
-//#define GPSPOWER -1                        //not used for non LoRaTracker boards, leave at -1
+//#define GPSPOWER 7                         //not used for non LoRaTracker boards, leave at -1
 
 /*
 ***********************************************************************************************************************************************
@@ -87,7 +87,7 @@ const byte GPS_Reply_Size = 12;             //size of GPS reply buffer
 const unsigned int GPS_Clear_DelaymS = 2000;     //mS to wait after a GPS Clear command is sent
 boolean GPS_Config_Error;  
 
-#define GPS_ALLOW_GPGSV                     //we want to see the GPGSV messages 
+//#define GPS_ALLOW_GPGSV                     //we want to see the GPGSV messages 
 #include "UBLOX_SerialGPS2.h"               //from LoRaTracker library 
 
 

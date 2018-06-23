@@ -534,7 +534,8 @@ void lora_ReadPacket()
 {
   byte index, RegData;
   lora_RXpacketCount++;
-  lora_RXPacketL = lora_Read(lora_RegRxNbBytes);
+  //lora_RXPacketL = lora_Read(lora_RegRxNbBytes);
+  lora_RXPacketL = min((lora_Read(lora_RegRxNbBytes)),lora_RXBUFF_Size);   //ensure long packet cannot overwrite buffer end
   
   lora_PacketRSSI = lora_returnRSSI(lora_Read(lora_RegPktRssiValue));
   lora_PacketSNR = lora_returnSNR(lora_Read(lora_RegPktSnrValue));

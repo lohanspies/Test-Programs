@@ -39,6 +39,9 @@ You can explicitly define the required pin below by removing the two // characte
 ********************************************************************************************************************************
 */
 
+#include <lmic.h>
+#include <hal/hal.h>
+
 #define LED1 8                       //Arduino pin number for LED, when high LED should be on.
 
 
