@@ -51,6 +51,10 @@ You can explicitly define the required pins below by removing the two // charact
 //#define SD_CS 10                     //Arduino pin number for device select on SD card module
 //#define LED1 8                       //Arduino pin number for LED, when high LED should be on.  
 
+#define SD_CS 25                     //Arduino pin number for device select on SD card module
+#define LED1 2                       //Arduino pin number for LED, when high LED should be on. 
+
+
 /*
 ***********************************************************************************************************************************************
 As an alternative to explicitly defining the Arduino pins required, there are pre-defined board definition files for the LoRaTracker boards
@@ -127,7 +131,7 @@ void setup()
   pinMode(LED1, OUTPUT);                               //for PCB LED
   led_Flash(5,100);
   
-  Serial.begin(38400);
+  Serial.begin(115200);
   Serial.println(F(programname));
   Serial.println(F(programversion));
   Serial.println(F(dateproduced));

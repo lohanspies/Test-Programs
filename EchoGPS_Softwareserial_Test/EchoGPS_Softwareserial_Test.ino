@@ -42,12 +42,12 @@ by removing the two // characters in front of the #defines
 ********************************************************************************************************************************
 */
 
-//#define GPSTX A2                           //pin number for TX output - Arduino into GPS
-//#define GPSRX A3                           //pin number for RX input - To Arduino from GPS
+#define GPSTX A2                           //pin number for TX output - Arduino into GPS
+#define GPSRX A3                           //pin number for RX input - To Arduino from GPS
 #define GPSPOWER 7                         //not used pin for non LoRaTracker boards so define as -1 or use 7 for Locator2 boards
 
-#define GPSTX 11                           //pin number for TX output - Arduino into GPS
-#define GPSRX 15                           //pin number for RX input - To Arduino from GPS
+//#define GPSTX 11                           //pin number for TX output - Arduino into GPS
+//#define GPSRX 15                           //pin number for RX input - To Arduino from GPS
 //#define GPSPOWER 7                         //not used pin for non LoRaTracker boards so define as -1 or use 7 for Locator2 boards
 
 /*

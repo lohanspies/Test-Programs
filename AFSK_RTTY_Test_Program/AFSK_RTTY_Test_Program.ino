@@ -47,7 +47,7 @@ in front of the #define Audio_Out and #define LED1 lines.
 */
 
 #define Audio_Out 6              //Pin used to output Audio tones  
-#define LED1 10                  //LED1 is toggled inside the AFSK_RTTY library, high for logic 1, low for logic 0, so it can be used to check the timing.
+#define LED1 8                  //LED1 is toggled inside the AFSK_RTTY library, high for logic 1, low for logic 0, so it can be used to check the timing.
 
 /*
 ***********************************************************************************************************************************************

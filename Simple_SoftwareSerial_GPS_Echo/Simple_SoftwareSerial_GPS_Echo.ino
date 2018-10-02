@@ -9,8 +9,8 @@ Define the pins to be used for Software Serial and the baud rate the GPS is usin
 *******************************************************************************************************************************
 */
 
-#define GPSTX 2                          //pin number for TX output - data from Arduino into GPS
-#define GPSRX 3                          //pin number for RX input - To Arduino from GPS
+#define GPSTX A2                          //pin number for TX output - data from Arduino into GPS
+#define GPSRX A3                          //pin number for RX input - To Arduino from GPS
 #define GPSBaud 9600                     //GPS Baud rate
 #define Serial_Monitor_Baud 115200       //this is baud rate used for the Arduino IDE Serial Monitor
 

@@ -2,8 +2,7 @@
 #define programversion "V1.0"
 #define dateproduced "26/11/2017"
 #define aurthorname "Stuart Robinson"
-#include <Arduino.h>
-//#include "Program_Definitions.h"                     //part of LoRaTracker library
+//#include <Arduino.h>
 
 /*
 *****************************************************************************************************************************
@@ -39,11 +38,7 @@ You can explicitly define the required pin below by removing the two // characte
 ********************************************************************************************************************************
 */
 
-#include <lmic.h>
-#include <hal/hal.h>
-
-#define LED1 8                       //Arduino pin number for LED, when high LED should be on.
-
+#define LED1 8                      //Arduino pin number for LED, when high LED should be on.
 
 /*
 ***********************************************************************************************************************************************
@@ -69,16 +64,16 @@ Select (include) the board definition file you require by removing the // charac
 //#include "MarkTwo_Board_Definitions.h"
 
 
-#define Serial_Monitor_Baud 38400          //this is baud rate used for the Arduino IDE Serial Monitor
+#define Serial_Monitor_Baud 115200          //this is baud rate used for the Arduino IDE Serial Monitor
 
+unsigned int seconds;
 
 void loop() 
 {
-  Serial.println(F("LED Flash"));
-  Serial.println();
-  led_Flash(5,250);
- 
-  delay(2000);
+  Serial.print(seconds);
+  Serial.println(F(" Seconds"));            //this message should print on console close to once per second   
+  seconds++;
+  led_Flash(4,125);
 }
 
 
@@ -111,6 +106,3 @@ void setup()
   pinMode(LED1, OUTPUT);                     //for PCB LED
   pinMode(13, OUTPUT);                       //for Pro Mini LED, Pin13
  }
-
-
-
