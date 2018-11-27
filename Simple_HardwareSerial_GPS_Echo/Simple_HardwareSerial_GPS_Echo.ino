@@ -10,10 +10,9 @@ Define the hardware serial port and the baud rate the GPS is using below, 9600 b
 *******************************************************************************************************************************
 */
 
-
 #include <Arduino.h>
 
-#define GPSserial Serial2                 //define hardware serial port the GPS is connected to, can be Serial1, Serial2, Serial3 or Serial4
+#define GPSserial Serial1                 //define hardware serial port the GPS is connected to, can be Serial1, Serial2, Serial3 or Serial4
 #define GPSBaud 9600                      //GPS Baud rate
 #define Serial_Monitor_Baud 115200        //this is baud rate used for the Arduino IDE Serial Monitor
 
@@ -30,5 +29,3 @@ void setup()
  Serial.begin(Serial_Monitor_Baud);       //setup Serial monitor ouput
  GPSserial.begin(GPSBaud);                //start Hardware for GPS at defined baud rate
 }
-
-

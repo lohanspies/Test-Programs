@@ -1,4 +1,4 @@
-#define programname "LoRa_Module_Test"
+#define programname "LoRa_Module_Test_ATmega"
 #define programversion "V2.0"
 #define dateproduced "02/10/2018"
 #define aurthorname "Stuart Robinson"
@@ -37,6 +37,10 @@
   If you have an LED connect it to the pin defined by LED1. Connect the LED so that when the pin is high the LED is on.
   When the program starts there will be a couple of brief LED flashes. If the LoRa device can be accessed the LED will be
   on solid for a couple of seconds. If the LoRa device cannot be accessed the LED will flash rapidly for 2 seconds.
+
+  The program then transmits an FM tone that will be heard on a UHF handheld if the frequency is set to 454.4Mhz. You
+  can also view the signal on an SDR. If the transmit power is the default 2dBm, with a 1/4wave antenna on the LoRa
+  expect to see a signal of around -10dBm on the SDR. 
 
   The program then repeats the above sequence.
 
@@ -95,23 +99,36 @@
 
 #define lora_NSS 10                   //Arduino pin number for device select on LoRa device
 #define lora_NReset 9                 //Arduino pin number for RESET pin on LoRa device
+#define lora_TonePin 6                //Arduino pin number for LoRa device DIO2 pin, FSK direct input
 #define LED1 8                        //Arduino pin number for LED, when high LED should be on.  
 
-const byte lora_RegFrMsb = 0x06;      //LoRa device register definition
-const byte lora_RegFrMid = 0x07;      //LoRa device register definition
-const byte lora_RegFrLsb = 0x08;      //LoRa device register definition
-const byte lora_RegVersion = 0x42;    //LoRa device register definition
-const float Frequency = 434.400;      //frequency to set in Megahertz
 
+const byte lora_RegOpMode = 0x01;         //LoRa device register definition 
+const byte lora_RegFdevLsb = 0x05;        //LoRa device register definition
+const byte lora_RegFrMsb = 0x06;          //LoRa device register definition
+const byte lora_RegFrMid = 0x07;          //LoRa device register definition
+const byte lora_RegFrLsb = 0x08;          //LoRa device register definition
+const byte lora_RegPaConfig = 0x09;       //LoRa device register definition 
+const byte lora_RegPacketConfig2 = 0x31;  //LoRa device register definition
+const byte lora_RegVersion = 0x42;        //LoRa device register definition
+
+const float Frequency = 434.400;      //frequency to set in Megahertz
+const int CalibrationOffset = 0;      //calibration offset in hertz
+const byte TXPower = 2;               //LoRa power in dBm  
+const byte Deviation = 0x52;          //typical deviation for tones, approx 5khz
+
+unsigned long lora_TXTime;            //used to record TX On time
+unsigned long lora_StartTXTime;       //used to record when TX starts
+
+ 
 #include <SPI.h>
 
-#define Serial_Monitor_Baud 9600       //this is baud rate used for the Arduino IDE Serial Monitor
+#define Serial_Monitor_Baud 9600      //this is baud rate used for the Arduino IDE Serial Monitor
 
 
 
 void loop()
 {
-  uint8_t reg_data;
   float tempfrequency;
   Serial.println(F("LED Flash"));
   Serial.println();
@@ -148,6 +165,13 @@ void loop()
     Serial.println(F("MHz"));
     Serial.println();
 
+    lora_SetFreq(Frequency, CalibrationOffset);
+    Serial.print(F("Transmit FM Tone"));
+    digitalWrite(LED1, HIGH);
+    lora_Tone(1000, 2500, TXPower);                  //Transmit an FM tone, 1000hz, 2500ms, 10dBm
+    digitalWrite(LED1, LOW);
+    Serial.println(F(" - Done"));
+    
   }
   else
   {
@@ -285,6 +309,7 @@ byte lora_CheckDevice()
   }
 }
 
+
 float lora_GetFreq()
 {
   //get the current set LoRa frequency
@@ -297,6 +322,75 @@ float lora_GetFreq()
   lora_Ltemp = ((lora_LFMsb * 0x10000ul) + (lora_LFMid * 0x100ul) + lora_LFLsb);
   lora_Ltemp1 = ((lora_Ltemp * 61.03515625) / 1000000ul);
   return lora_Ltemp1;
+}
+
+
+void lora_Tone(int ToneFrequency, unsigned long ToneLength, int TXPower)
+{
+  //Transmit an FM audio tone without using tone library. Uses simple delayMicroseconds values that are assumed to be no more than
+  //16383us or about 60Hz, lengths for low frequency tones will not be accurate.
+
+  uint32_t ToneDelayus, Tone_end_mS;
+  ToneDelayus = ToneFrequency / 2;
+
+#ifdef LORADEBUG
+  Serial.print(F("lora_Tone()  "));
+  Serial.print(F("Delay "));
+  Serial.print(ToneDelayus);
+  Serial.print(F("uS  "));
+#endif
+
+  lora_DirectSetup();
+  lora_Write(lora_RegFdevLsb, Deviation);     //We are generating a tone so set the deviation, 5kHz
+  Tone_end_mS = millis() + ToneLength;
+  lora_TXONDirect(TXPower);
+  pinMode(lora_TonePin, OUTPUT);
+
+  while (millis() < Tone_end_mS)
+  {
+    digitalWrite(lora_TonePin, HIGH);
+    delayMicroseconds(ToneDelayus);
+    digitalWrite(lora_TonePin, LOW);
+    delayMicroseconds(ToneDelayus);
+  }
+
+  pinMode(lora_TonePin, INPUT);
+  lora_TXOFF();
+}
+
+
+void lora_TXOFF()
+{
+  //turns off transmitter
+  lora_Write(lora_RegOpMode, 0x08);           //TX and RX to sleep, in direct mode
+#ifdef LORADEBUG
+  unsigned long temp;
+  temp = millis() - lora_StartTXTime;
+  Serial.print(temp);
+  Serial.println(F("mS"));
+#endif
+  lora_TXTime = (millis() - lora_StartTXTime);
+}
+
+
+void lora_DirectSetup()
+{
+  //setup LoRa device for direct modulation mode
+  lora_Write(lora_RegOpMode, 0x08);
+  lora_Write(lora_RegPacketConfig2, 0x00);    //set continuous mode
+}
+
+
+void lora_TXONDirect(byte TXPower)
+{
+  //turns on transmitter,in direct mode for FSK and audio  power level is from 2 to 17
+#ifdef LORADEBUG
+  Serial.print(TXPower);
+  Serial.print(F("dBm "));
+#endif
+  lora_StartTXTime = millis();
+  lora_Write(lora_RegPaConfig, (TXPower + 0xEE));
+  lora_Write(lora_RegOpMode, 0x0B);           //TX on direct mode, low frequency mode
 }
 
 

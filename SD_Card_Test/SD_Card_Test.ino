@@ -51,8 +51,6 @@ You can explicitly define the required pins below by removing the two // charact
 //#define SD_CS 10                     //Arduino pin number for device select on SD card module
 //#define LED1 8                       //Arduino pin number for LED, when high LED should be on.  
 
-#define SD_CS 25                     //Arduino pin number for device select on SD card module
-#define LED1 2                       //Arduino pin number for LED, when high LED should be on. 
 
 
 /*
@@ -66,7 +64,7 @@ Select (include) the board definition file you require by removing the // charac
 ***********************************************************************************************************************************************
 */
 
-//#include "LCD_Receiver_Board_Definitions.h"
+#include "LCD_Receiver_Board_Definitions.h"
 //#include "Receiver2_Board_Definitions.h"
 //#include "Sensor1_Board_Definitions.h"
 
