@@ -1,9 +1,9 @@
-//LoRa_Test.h
+//LoRa.h
 /*
 *******************************************************************************************************************************
   Easy Build LoRaTracker Programs for Arduino
 
-  Copyright of the author Stuart Robinson - 28/05/18
+  Copyright of the author Stuart Robinson - 21/1/18
 
   http://www.LoRaTracker.uk
 
@@ -19,8 +19,7 @@
   style libraries. Tone for instance is missing from DUE and Microbit and some environments default to 32 bit integers which
   can cause issues for the normal 'int' declarations.
 
-  Note: This library must be considered as a work in progress, no guarantees.
-  21/1/18 - Added auto frequency control capability
+  The routines here do not included the packet addressing functions found on the other LoRaTracker programs.
 
   To Do:
 
@@ -96,7 +95,6 @@ const byte lora_RegRxPacketCntValueLsb = 0x17;
 const byte lora_RegPktSnrValue = 0x19;
 const byte lora_RegPktRssiValue = 0x1A;
 const byte lora_RegRssiValue = 0x1B;
-const byte lora_RegHopChannel = 0x1C;
 const byte lora_RegFsiMSB = 0x1D;
 const byte lora_RegFsiLSB = 0x1E;
 const byte lora_RegModemConfig1 = 0x1D;
@@ -110,26 +108,19 @@ const byte lora_RegFeiMsb = 0x28;
 const byte lora_RegFeiMid = 0x29;
 const byte lora_RegFeiLsb = 0x2A;
 const byte lora_RegPacketConfig2 = 0x31;
-const byte lora_RegInvertIQ = 0x33;
-const byte lora_RegSyncWord = 0x39;
 const byte lora_RegDioMapping = 0x40;
 const byte lora_RegPllHop = 0x44;
 
 byte  lora_RXBUFF[lora_RXBUFF_Size];           //buffer where received packets are stored
 byte  lora_TXBUFF[lora_TXBUFF_Size];           //buffer for packet to send
 
-byte  lora_RXStart;               //start of packet data in RXbuff
-byte  lora_RXEnd;                 //end of packet data in RXbuff
-//byte  lora_RXPacketType;          //type number of received packet
-//byte  lora_RXDestination;         //destination address of received packet
-//byte  lora_RXSource;              //source address of received packet
-unsigned int lora_RXpacketCount;  //count of received packets
+byte  lora_RXStart;                            //start of packet data in RXbuff
+byte  lora_RXEnd;                              //end of packet data in RXbuff
+unsigned int lora_RXpacketCount = 0;           //count of received packets
+unsigned int lora_RXCRCerrorCount = 0;         //count of received packets
 
 byte  lora_TXStart;               //start of packet data in TX buffer
 byte  lora_TXEnd;                 //end of packet data in TX buffer
-//byte  lora_TXPacketType;          //type number of transmitted packet
-//byte  lora_TXDestination;         //destination address of transmitted packet
-//byte  lora_TXSource;              //source address of transmitted packet
 unsigned int lora_TXpacketCount;  //count of transmitted packets
 
 int8_t lora_BackGroundRSSI;       //measured background noise level
@@ -141,12 +132,7 @@ byte  lora_Power;                 //power setting for mode
 
 unsigned long lora_TXTime;        //used to record TX On time
 unsigned long lora_StartTXTime;   //used to record when TX starts
-unsigned long lora_RXTime;        //used to record RX On time
-unsigned long lora_StartRXTime;   //used to record when RX starts
 
-
-//precalculated values for frequency error calculation
-const PROGMEM  float bandwidth[] = {0.1309, 0.1745, 0.2617, 0.3490, 0.5234, 0.6996, 1.049, 2.097, 4.194, 8.389}; 
 
 /*
 **************************************************************************************************
@@ -271,59 +257,6 @@ byte lora_Read(byte Reg)
 }
 
 
-signed int lora_GetFrequencyError()
-{
-  unsigned int msb, mid, lsb;
-  int freqerr;
-  byte bw;
-  float bwconst;
-  
-  msb = lora_Read(lora_RegFeiMsb);
-  mid = lora_Read(lora_RegFeiMid);
-  lsb = lora_Read(lora_RegFeiLsb);
-  bw = lora_Read(lora_RegModemConfig1) & (0xF0);
-  bw = bw >> 4;
-  bwconst = pgm_read_float_near(bandwidth + bw);
-  
-#ifdef LORADEBUG
-  Serial.print(" msb=");
-  Serial.print(msb, HEX);
-  Serial.print(" mid=");
-  Serial.print(mid, HEX);
-  Serial.print(" lsb=");
-  Serial.print(lsb, HEX);
-  Serial.print(" bw=");
-  Serial.print(bw);
-#endif
-
-  freqerr = msb << 12;                     //shift lower 4 bits of msb into high 4 bits of freqerr
-  mid = (mid << 8) + lsb;
-  mid = (mid >> 4);
-  freqerr = freqerr + mid;
-
-#ifdef LORADEBUG
-  Serial.print(" freqerr1=");
-  Serial.print(freqerr, HEX);
-  Serial.print(" freqerr2=");
-  Serial.print(freqerr);
-  Serial.print(" bwconst=");
-  Serial.print(bwconst, 4);
-  Serial.print("  ");
-#endif
-
-  freqerr = (int) (freqerr * bwconst);
-
-#ifdef LORADEBUG
-  Serial.print(" freqerr3=");
-  Serial.print(freqerr);
-  Serial.print("  ");
-#endif
-
-  return freqerr;
-}
-
-
-
 void lora_SetFreq(uint64_t freq64, int loffset)
 {
   freq64 = freq64 + loffset;
@@ -331,22 +264,6 @@ void lora_SetFreq(uint64_t freq64, int loffset)
   lora_Write(lora_RegFrMsb, (byte)(freq64 >> 16));
   lora_Write(lora_RegFrMid, (byte)(freq64 >> 8));
   lora_Write(lora_RegFrLsb, (byte)(freq64 >> 0));
-}
-
-
-uint32_t lora_GetFreq2()
-{
-  //get the current set LoRa device frequency
-  byte Msb, Mid, Lsb;
-  unsigned int uinttemp;
-  float floattemp;
-  Msb = lora_Read(lora_RegFrMsb);
-  Mid = lora_Read(lora_RegFrMid);
-  Lsb = lora_Read(lora_RegFrLsb);
-  floattemp = ((Msb * 0x10000ul) + (Mid * 0x100ul) + Lsb);
-  floattemp = ((floattemp * 61.03515625) / 1000000ul);
-  uinttemp = (uint32_t)(floattemp * 1000000);
-  return uinttemp;
 }
 
 
@@ -392,7 +309,6 @@ void lora_Setup()
   lora_Write(lora_RegSymbTimeoutLsb, 0xFF);   //RegSymbTimeoutLsb
   lora_Write(lora_RegPreambleLsb, 0x0C);      //RegPreambleLsb, default
   lora_Write(lora_RegFdevLsb, Deviation);     //LSB of deviation, 5kHz
-  lora_Write(lora_RegSyncWord, SyncWord);     //sync word
 }
 
 
@@ -516,90 +432,52 @@ void lora_Print()
 void lora_RXBuffPrint(byte PrintType)
 {
   //Print contents of RX buffer as ASCII,decimal or HEX
-  //PrintType = 0 = ASCII
+  //PrintType = 0 = ASCII  characters below 0x20 replaced with space
   //PrintType = 1 = Decimal
   //PrintType = 2 = HEX
   byte bufferData;
 
   for (byte index = lora_RXStart; index <= lora_RXEnd; index++)
   {
+    bufferData = lora_RXBUFF[index];
+
     if (PrintType == 0)
     {
-      Serial.write(lora_RXBUFF[index]);
+
+      if (bufferData < 0x20)
+      {
+        Serial.write(0x20);
+      }
+      else
+      {
+        Serial.write(bufferData);
+      }
     }
 
     if (PrintType == 1)
     {
-      Serial.print(lora_RXBUFF[index]);
-      Serial.print(F(" "));
+      Serial.print(bufferData);
+      Serial.print(F(","));
     }
 
     if (PrintType == 2)
     {
-      bufferData = lora_RXBUFF[index];
       if (bufferData < 0x10)
       {
         Serial.print(F("0"));
       }
       Serial.print(bufferData, HEX);
-      Serial.print(F(" "));
+      Serial.print(F(","));
     }
   }
 }
-
-
-void lora_RXBuffPrint2(byte PrintType)
-{
-  //Print contents of RX buffer as ASCII,decimal or HEX
-  //PrintType = 0 = ASCII
-  //PrintType = 1 = Decimal
-  //PrintType = 2 = HEX
-  byte bufferData;
-  unsigned int index;
-
-  for (index = 0; index <= 255; index++)
-  {
-    if (PrintType == 0)
-    {
-      Serial.write(lora_RXBUFF[index]);
-    }
-
-    if (PrintType == 1)
-    {
-      Serial.print(lora_RXBUFF[index]);
-      Serial.print(F(" "));
-    }
-
-    if (PrintType == 2)
-    {
-      bufferData = lora_RXBUFF[index];
-      if (bufferData < 0x10)
-      {
-        Serial.print(F("0"));
-      }
-      Serial.print(bufferData, HEX);
-      Serial.print(F(" "));
-    }
-  }
-}
-
-
 
 
 void lora_RXOFF()
 {
   lora_Write(lora_RegOpMode, 0x89);                //TX and RX to sleep, in direct mode
-  lora_RXTime = lora_RXTime + (millis() - lora_StartRXTime);
 }
 
-
-void lora_AddressInfo()
-{
-  //print the information for packet last received
-  Serial.print(F("Length,"));
-  Serial.print(lora_RXPacketL);
-  Serial.print(F(" "));
-}
 
 void lora_ReceptionInfo()
 {
@@ -611,10 +489,11 @@ void lora_ReceptionInfo()
   Serial.print(lora_PacketSNR);
   Serial.print(F("dB"));
 
-  Serial.print(F("  RSSI,"));
+  Serial.print(F(",RSSI,"));
   Serial.print(lora_PacketRSSI);
-  Serial.print(F("dB "));
+  Serial.print(F("dB"));
 }
+
 
 
 int8_t lora_returnRSSI(byte RegData)
@@ -643,8 +522,7 @@ void lora_ReadPacket()
 {
   byte index, RegData;
   lora_RXpacketCount++;
-  
-  lora_RXPacketL = min((lora_Read(lora_RegRxNbBytes)),(lora_RXBUFF_Size-1));   //ensure long packet cannot overwrite buffer end
+  lora_RXPacketL = lora_Read(lora_RegRxNbBytes);
 
   lora_PacketRSSI = lora_returnRSSI(lora_Read(lora_RegPktRssiValue));
   lora_PacketSNR = lora_returnSNR(lora_Read(lora_RegPktSnrValue));
@@ -655,7 +533,7 @@ void lora_ReadPacket()
   SPI.transfer(lora_RegFifo);                //address for burst read
 
   lora_RXStart = 0;
-  lora_RXEnd = lora_RXPacketL - 1;           //calculate the end of the packet in the buffer
+  lora_RXEnd = lora_RXPacketL - 1;           //the end of the packet in the buffer
 
   for (index = lora_RXStart; index <= lora_RXEnd; index++)
   {
@@ -674,11 +552,10 @@ void lora_RXONLoRa()
   lora_Write(lora_RegOpMode, 0x09);
   lora_Write(lora_RegFifoRxBaseAddr, 0x00);
   lora_Write(lora_RegFifoAddrPtr, 0x00);
-  lora_Write(lora_RegIrqFlagsMask, IrqMask);                //allow rxdone, crc error and valid header
+  lora_Write(lora_RegIrqFlagsMask, 0x9F);                //only allow rxdone and crc error
   lora_Write(lora_RegIrqFlags, 0xFF);
   lora_Write(lora_RegDioMapping, 0x00);                  //DIO0 will be RXDone
   lora_Write(lora_RegOpMode, 0x8D);
-  lora_StartRXTime = millis();
   lora_BackGroundRSSI = lora_Read(lora_RegRssiValue);    //get the background noise level
 }
 
@@ -707,58 +584,6 @@ byte lora_readRXready2()
 }
 
 
-byte lora_waitPacket(char waitPacket, unsigned long waitSeconds)
-{
-  //wait time specified for a incoming packet, 0 = no timeout
-  //returns a value of 0 for timeout, 1 for packet received
-
-  int8_t PacketType = 0;                            //function can exit before PacketType is assigned but not not used, this creates a compiler warning
-
-  byte RegData;
-  unsigned long endtime;
-  endtime = (millis() + (waitSeconds * 1000));
-  lora_RXONLoRa();
-#ifdef LORADEBUG
-  Serial.print(F("Wait "));
-  Serial.write(waitPacket);
-  Serial.println();
-#endif
-
-  do
-  {
-    RegData = lora_readRXready();
-
-    if (RegData == 64)
-    {
-      lora_ReadPacket();
-      lora_AddressInfo();
-      Serial.println();
-      lora_RXONLoRa();                          //ready for next and clear flags
-    }
-
-    if ((waitSeconds > 0) && (millis() >= endtime))
-    {
-#ifdef LORADEBUG
-      Serial.println(F("Timeout"));
-#endif
-      return 0;
-    }
-
-    if (Serial.available() > 0)
-    {
-#ifdef LORADEBUG
-      Serial.println(F("Serial in ?"));
-#endif
-      keypress = 1;
-      while (Serial.read() != -1);             //clear serial input buffer
-      return 0;                                //treat a keypress as a timeout so return 0
-    }
-
-  }
-  while ((PacketType !=  waitPacket));
-
-  return 1;
-}
 
 /*
 **************************************************************************************************
@@ -815,7 +640,7 @@ void lora_TXONLoRa(byte TXPower)
 
 
 
-void lora_Send(byte TXBuffStart, byte TXBuffEnd, long TXTimeout, byte TXPower, byte StripAddress)
+void lora_Send(byte TXBuffStart, byte TXBuffEnd, long TXTimeout, byte TXPower)
 {
   byte index;
   byte BufferData, RegData;
@@ -859,5 +684,6 @@ void lora_Send(byte TXBuffStart, byte TXBuffEnd, long TXTimeout, byte TXPower, b
 
   lora_TXOFF();
 }
+
 
 
