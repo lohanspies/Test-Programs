@@ -1,4 +1,4 @@
-//SSD1306_Display_Test_Adafruit.ino
+                                                                //SSD1306_Display_Test_Adafruit.ino
 /*
 **************************************************************************************************
 
@@ -35,14 +35,17 @@ void loop()
   Serial.println(F("Running Display Test"));
   display.setTextSize(1);
   display.setTextColor(WHITE);
+  display.clearDisplay();
+  display.display();
   display.setCursor(0,0);
   display.println("Hello, world!");
-  display.setCursor(0,1);
+  display.setCursor(0,12);
   display.println("LoRaTracker");
   display.display();
   delay(2000);
   display.clearDisplay();
-  delay(2000);
+  display.display();
+  delay(1000);
 }
 
 

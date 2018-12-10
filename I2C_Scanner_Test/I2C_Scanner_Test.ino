@@ -54,7 +54,7 @@ The program uses the standard I2C connections on Arduino.
 #include <Wire.h>
 #include "I2C_Scanner.h"
 
-#define Serial_Monitor_Baud 38400          //this is baud rate used for the Arduino IDE Serial Monitor
+#define Serial_Monitor_Baud 115200          //this is baud rate used for the Arduino IDE Serial Monitor
 
 void loop()
 {
