@@ -18,6 +18,8 @@ The library defaults to SX1276\8 mode, to use the library for SX1272 make sure t
  
 LoRaWAN uses a different sync word (0x34) from the default (0x12) used by the LoRaTracker libraries. The library uses the default sync word, to use the LoRaWAN syncword make sure there is a define '#define UseLoRaWAN' in the settings file. 
 
+The transmitter program creates a log file logxx.txt, where xx is a number for 0 to 99. If log01.txt exists the program attempts to create log02.txt, this process continues up to log99.txt. But sure to keep old logs purged from the SD card. The log number in use is displayed on the serial monitor and optional attached display. Pressing the switch on the logger (active low) closes the SD log file and halts the logger. You need to switch the receiver off and then on again to restart it. 
+
 Do not forget to fit an antenna to the LoRa device, you can destroy it if you use it without and antenna.
 
 
