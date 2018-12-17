@@ -54,7 +54,7 @@ The program uses the standard I2C connections on Arduino.
 #include <Wire.h>                                                //Comes with Arduino IDE
 #include <LiquidCrystal_I2C.h>                                   //www.4tronix.co.uk/arduino/sketches/LiquidCrystal_V1.2.1.zip
 #include "I2C_Scanner.h"
-#define PCF8574Address 0x27                                      //address of PCF8574 can change, I have noted addresses of 0x27 and 0x3F
+#define PCF8574Address 0x3F                                      //address of PCF8574 can change, I have noted addresses of 0x27 and 0x3F
 
 LiquidCrystal_I2C disp(PCF8574Address, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  //Set the LCD I2C address and pins used
 
