@@ -41,6 +41,7 @@
   Test lora_GetFrequencyError() with SX1272
   Add a lora_SetFreqFloat
   Review lora_SendFIFO, used by relay
+  Change to RSSI routine to use -164 for LF port -157 for HF port
   
   Changes:
 
@@ -451,7 +452,6 @@ uint32_t lora_returnSetBandwidth()
 #endif
 
 
-
 #ifdef UseSX1272
 uint8_t lora_returnSetOptimisation()
 {
@@ -799,7 +799,6 @@ Serial.print(tempfrequency);
 }
 
 
-
 uint8_t lora_CheckDevice()
 {
   //check there is a device out there, writes a register and reads back, puts original value back
@@ -825,7 +824,6 @@ boolean lora_GetSleepMode()
   temp = (lora_Read(lora_RegOpMode) & 0x07);
   return temp;
 }
-
 
 
 void lora_PrintSleepMode()
@@ -1092,7 +1090,6 @@ void lora_SetModem2(uint8_t Bandwidth, uint8_t SpreadingFactor, uint8_t CodeRate
 #endif
 
 
-
 void lora_PrintASCIIorHEX(uint8_t temp)
 {
 //Serial.println(F("lora_PrintASCIIorHEX()"));
@@ -1239,9 +1236,6 @@ void lora_FIFOPrint(uint8_t PrintType, uint8_t FIFOstart, uint8_t FIFOlength)
 }
 
 
-// //FIFOstart = lora_Read(lora_RegFifoAddrPtr);
-//  FIFOlength = lora_Read(lora_RegRxNbBytes) - 1;
-
 void lora_RXFIFOPrint(uint8_t PrintType)
 {
   #ifdef LORADEBUG
@@ -1255,7 +1249,6 @@ FIFOlength = lora_Read(lora_RegRxNbBytes);
 FIFOstart = lora_Read(lora_RegFifoRxBaseAddr);
 lora_FIFOPrint(PrintType, FIFOstart, FIFOlength);
 }
-
 
 
 void lora_TXFIFOPrint(uint8_t PrintType)
@@ -1272,7 +1265,6 @@ FIFOlength = lora_Read(lora_RegFifoAddrPtr) - lora_Read(lora_RegFifoTxBaseAddr) 
 FIFOstart = lora_Read(lora_RegFifoTxBaseAddr);
 lora_FIFOPrint(PrintType, FIFOstart, FIFOlength);
 }
-
 
 
 void lora_RXOFF()
@@ -1358,7 +1350,7 @@ void lora_PrintLoRaSettings()
 
 int8_t lora_returnRSSI(uint8_t RegData)
 {
-  RegData = (139 - RegData) * (-1);
+  RegData = (-164 + RegData);
   return RegData;
 }
 
@@ -1488,8 +1480,6 @@ uint8_t lora_waitPacket(char waitPacket, uint32_t waitSeconds)
   Serial.println(F("lora_waitPacket()"));
   #endif
   int8_t PacketType = 0;                            //function can exit before PacketType is assigned but not not used, this creates a compiler warning
-
-  //uint8_t RegData;
   uint32_t endtime;
   endtime = (millis() + (waitSeconds * 1000));
   lora_RXONLoRa();
@@ -1568,14 +1558,12 @@ void lora_TXBuffPrint(uint8_t PrintType)
   {
     if (PrintType == 0)
     {
-      //Serial.write(lora_TXBUFF[index]);
-	  lora_PrintASCIIorHEX(lora_RXBUFF[index]);
+	lora_PrintASCIIorHEX(lora_RXBUFF[index]);
     }
 
     if (PrintType == 1)
     {
       lora_PrintHEXByte(lora_TXBUFF[index]);
-	  //Serial.print(lora_TXBUFF[index]);
       Serial.print(F(" "));
     }
 
@@ -1742,9 +1730,10 @@ uint8_t lora_QueuedSend(uint8_t TXBuffStart, uint8_t TXBuffEnd, char TXPacketTyp
   return 0;
 }
 
+
 void lora_SendFIFO(byte lora_LPacketL, long lora_LTXTimeout, byte lora_LTXPower)
 {
-  //send contents of FIFO,
+  //send contents of FIFO
   byte lora_LRegData;
   lora_Write(lora_RegOpMode, 0x09);
   lora_Write(lora_RegIrqFlags, 0xFF);
@@ -1763,4 +1752,3 @@ void lora_SendFIFO(byte lora_LPacketL, long lora_LTXTimeout, byte lora_LTXPower)
   }
   while (lora_LTXTimeout > 0 && lora_LRegData == 0) ;	                 //use a timeout counter, just in case the TX sent flag is missed
 }
-
