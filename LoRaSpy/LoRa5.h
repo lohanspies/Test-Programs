@@ -1126,8 +1126,8 @@ void lora_RXBuffPrint(uint8_t PrintType)
   #endif
   
   uint8_t bufferData;
-  //Serial.println(F("lora_RXBuffPrint()"));
   
+  /* - Removed not part of buffer
   if (PrintType == 0)
   {
   lora_PrintASCIIorHEX(lora_RXPacketType);
@@ -1137,17 +1137,6 @@ void lora_RXBuffPrint(uint8_t PrintType)
   
   if (PrintType == 1)
   {
-  lora_PrintHEXByte(lora_RXPacketType);
-  Serial.print(F(" "));
-  lora_PrintHEXByte(lora_RXDestination);
-  Serial.print(F(" "));
-  lora_PrintHEXByte(lora_RXSource);
-  Serial.print(F(" "));
-  }
-  
-  
-  if (PrintType == 2)
-  {
   Serial.print(lora_RXPacketType);
   Serial.print(F(" "));
   Serial.print(lora_RXDestination);
@@ -1156,6 +1145,16 @@ void lora_RXBuffPrint(uint8_t PrintType)
   Serial.print(F(" "));
   }
   
+  if (PrintType == 2)
+  {
+  lora_PrintHEXByte(lora_RXPacketType);
+  Serial.print(F(" "));
+  lora_PrintHEXByte(lora_RXDestination);
+  Serial.print(F(" "));
+  lora_PrintHEXByte(lora_RXSource);
+  Serial.print(F(" "));
+  }
+  */
   
   
   for (uint8_t index = lora_RXStart; index <= lora_RXEnd; index++)
@@ -1167,9 +1166,7 @@ void lora_RXBuffPrint(uint8_t PrintType)
 
     if (PrintType == 1)
     {
-      //lora_TXBUFF[index])
-	  lora_PrintHEXByte(lora_RXBUFF[index]);
-	  //Serial.print(lora_RXBUFF[index]);
+	  Serial.print(lora_RXBUFF[index]);
       Serial.print(F(" "));
     }
 
@@ -1369,6 +1366,20 @@ int8_t lora_returnSNR(uint8_t RegData)
   return RegData;
 }
 
+int8_t lora_ReadBackgroundRSSI()
+{
+int8_t BackgroundRSSI;
+BackgroundRSSI = lora_returnRSSI(lora_Read(lora_RegRssiValue));
+return BackgroundRSSI;
+}
+
+void lora_PrintBackgroundRSSI()
+{
+int8_t BackgroundRSSI;
+BackgroundRSSI = lora_ReadBackgroundRSSI();
+Serial.print(BackgroundRSSI);
+}
+
 
 void lora_ReadPacketDetails()
 {
@@ -1550,20 +1561,17 @@ void lora_TXBuffPrint(uint8_t PrintType)
   #endif
   
   uint8_t index, bufferData;
-  Serial.write(lora_TXPacketType);
-  Serial.write(lora_TXDestination);
-  Serial.write(lora_TXSource);
-
+    
   for (index = lora_TXStart; index <= lora_TXEnd; index++)
   {
     if (PrintType == 0)
     {
-	lora_PrintASCIIorHEX(lora_RXBUFF[index]);
+	lora_PrintASCIIorHEX(lora_TXBUFF[index]);
     }
 
     if (PrintType == 1)
     {
-      lora_PrintHEXByte(lora_TXBUFF[index]);
+      Serial.print(lora_TXBUFF[index]);
       Serial.print(F(" "));
     }
 
@@ -1605,7 +1613,6 @@ void lora_Send(uint8_t TXBuffStart, uint8_t TXBuffEnd, char TXPacketType, char T
   uint8_t index;
   uint8_t BufferData, RegData;
   uint8_t TXPacketL = 0;
-
 
   lora_Write(lora_RegOpMode, 0x09);
   lora_Write(lora_RegIrqFlags, 0xFF);
