@@ -164,16 +164,16 @@ void loop()
 
 void check_Switch()
 {
+#ifdef USESD
   if (!(digitalRead(Switch1)))              //if switch is pressed, close log and halt
   {
     Serial.print(F("Switch Pressed - Closing log "));
     Serial.println(filename);
 
-#ifdef USESD
+
     logFile = SD.open(filename, FILE_WRITE);
     logFile.print(F("Switch Pressed - Closing log "));
     logFile.close();
-#endif
 
 #ifdef UseDisplay
     disp.clear();
@@ -185,6 +185,7 @@ void check_Switch()
 
     while (1);                  //loop forever
   }
+#endif  
 }
 
   void process_Packet()
