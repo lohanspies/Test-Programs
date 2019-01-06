@@ -103,6 +103,8 @@ const uint8_t CR48 = 32;            //4:8
 //Constant names for LoRa Header Settings
 const uint8_t Explicit    = 0;     //Use to set explicit header
 const uint8_t Implicit    = 4;     //Use to set implicit header
+const uint8_t LowDoptON = 0x01;    //value to turn low data rate optimization on
+const uint8_t LowDoptOFF = 0x00;   //value to turn low data rate optimization off
 #endif
 
 
@@ -110,13 +112,13 @@ const uint8_t Implicit    = 4;     //Use to set implicit header
 //Constant names for LoRa Header Settings
 const uint8_t Explicit    = 0;     //Use to set explicit header
 const uint8_t Implicit    = 1;     //Use to set implicit header
+const uint8_t LowDoptON = 0x08;    //value to turn low data rate optimization on
+const uint8_t LowDoptOFF = 0x00;   //value to turn low data rate optimization off
 #endif
 
 
 //Miscellaneous definitions
 const uint8_t Deviation = 0x52;    //typical 5Khz deviation for 5khz FM style tones
-const uint8_t LowDoptON = 0x01;    //value to turn low data rate optimization on
-const uint8_t LowDoptOFF = 0x00;   //value to turn low data rate optimization off
 const uint8_t PrintASCII = 0;      //value to cause buffer print to appear as ASCII
 const uint8_t PrintDecimal = 1;    //value to cause buffer print to appear as decimal numbers
 const uint8_t PrintHEX = 2;        //value to cause buffer print to appear as hexadecimal numbers
@@ -1274,7 +1276,7 @@ void lora_RXOFF()
 }
 
 
-void lora_AddressInfo()
+void lora_PrintAddressInfo()
 {
   //print the information for packet last received
   #ifdef LORADEBUG
@@ -1387,7 +1389,6 @@ void lora_ReadPacketDetails()
   #ifdef LORADEBUG
   Serial.println(F("lora_ReadPacketDetails()"));
   #endif
-  lora_RXpacketCount++;
 
   lora_PacketRSSI = lora_returnRSSI(lora_Read(lora_RegPktRssiValue));
   lora_PacketSNR = lora_returnSNR(lora_Read(lora_RegPktSnrValue));
